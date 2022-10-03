@@ -33,17 +33,19 @@ function App() {
   const [guesses, setGuesses] = useState(guessesQty)
   const [score, setScore] = useState(0)
 
-  const pickWordAndCategory = () =>{
+  const pickWordAndCategory = useCallback(() =>{
     const categories = Object.keys(words); //fornece um array com todas as chaves
     const category = categories[Math.floor(Math.random()*Object.keys(categories).length)]
 
     const word = words[category][Math.floor(Math.random()*words[category].length)]
 
     return { word, category }
-  }
+  }, [words])
 
   //Começa o jogo:
-  const startGame = ()=>{
+  const startGame = useCallback(()=>{
+    //limpar as letras
+    clearLetterStates()
     //escolher a palavra e categoria
     const { word, category } = pickWordAndCategory()
     numberOfGuesses()
@@ -60,7 +62,7 @@ function App() {
 
 
     setGameStage(stages[1].name)
-  }
+  }, [pickWordAndCategory])
 
   //process the letter input
   const verifyLetter = (letter) =>{
@@ -105,6 +107,21 @@ function App() {
     }
   }, [guesses])
 
+  useEffect(()=>{
+    // array de letras únicas, o Set só deixa itens únicos
+    const uniqueLetters = [...new Set(letters)]
+    
+    //condição de vitória
+    if(guessedLetters.length === uniqueLetters.length){
+      // add score
+      setScore((actualScore)=> actualScore += 100)
+
+      //reinício do jogo
+      startGame()
+    }
+
+  }, [guessedLetters, letters, startGame])
+
   // reinicia o jogo
   const retry =() =>{
     setScore(0)
@@ -114,13 +131,12 @@ function App() {
 
 
   const numberOfGuesses = ()=>{
-    let guessesNumber = prompt("escolha o número de palpites")
-
-    if (guessesNumber != null){
+    /* let guessesNumber = prompt("escolha o número de palpites") */
+    let guessesNumber = 3
+    setGuesses(guessesNumber)
+/*     if (guessesNumber != null){
       setGuesses(guessesNumber)
-    } 
-
-    console.log(guessesNumber)
+    }  */
   }
   
 
